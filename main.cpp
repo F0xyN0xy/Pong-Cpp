@@ -106,7 +106,7 @@ static void UpdateParticles(float dt) {
         if (p.life <= 0) { p.active = false; continue; }
         p.pos.x += p.vel.x * dt;
         p.pos.y += p.vel.y * dt;
-        p.vel.y += 120.0f * dt; // slight gravity
+        p.vel.y += 120.0f * dt;
         p.size   = (p.life / p.maxLife) * 5.0f;
     }
 }
@@ -267,7 +267,7 @@ struct SaveData {
     bool  neonTheme;
 };
 
-static const char SAVE_PATH[] = "neonpong_save.dat";
+static const char SAVE_PATH[] = "pong_save.dat";
 
 static void DefaultSave(SaveData &s) {
     memset(&s, 0, sizeof(s));
@@ -333,10 +333,8 @@ struct Ball {
 // ─────────────────────────────────────────────────────────────
 //  AUDIO (generated procedurally via wave synthesis)
 // ─────────────────────────────────────────────────────────────
-// We create sounds programmatically so no asset files are needed
+
 static Sound sSfxPaddle, sSfxWall, sSfxScore, sSfxMenu, sSfxWin;
-// REMOVED: static Music sBgMusic;          // unused
-// REMOVED: static bool  gMusicLoaded = false; // unused
 
 // Generate a simple tone as a Sound
 static Sound GenTone(float freq, float dur, float vol, int waveType=0) {
@@ -374,8 +372,6 @@ static void PlaySfx(Sound &snd, float vol) {
 // ─────────────────────────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────────────────────────
-// REMOVED: static float Lerp(float a, float b, float t) { return a + (b - a) * t; }
-// Raylib's raymath.h already provides Lerp()
 
 static void DrawCenteredText(const char *txt, int y, int fs, Color col) {
     int tw = MeasureText(txt, fs);
@@ -526,8 +522,6 @@ static bool  gGameOver   = false;
 static int   gWinner     = 0;
 static int   gRally      = 0;
 static float gLastSpeed  = 0;
-// REMOVED: static float gComboTimer = 0;  // unused
-// REMOVED: static int   gCombo      = 0;   // also unused (was only used with combo timer)
 
 // celebration
 static float gCelebTimer = 0;
