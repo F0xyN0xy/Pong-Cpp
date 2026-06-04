@@ -106,7 +106,7 @@ static void UpdateParticles(float dt) {
         if (p.life <= 0) { p.active = false; continue; }
         p.pos.x += p.vel.x * dt;
         p.pos.y += p.vel.y * dt;
-        p.vel.y += 120.0f * dt;
+        p.vel.y += 120.0f * dt; // slight gravity
         p.size   = (p.life / p.maxLife) * 5.0f;
     }
 }
@@ -333,12 +333,12 @@ struct Ball {
 // ─────────────────────────────────────────────────────────────
 //  AUDIO (generated procedurally via wave synthesis)
 // ─────────────────────────────────────────────────────────────
-
 static Sound sSfxPaddle, sSfxWall, sSfxScore, sSfxMenu, sSfxWin;
+static Music sBgMusic;
+static bool  gMusicLoaded = false;
 
 // Generate a simple tone as a Sound
 static Sound GenTone(float freq, float dur, float vol, int waveType=0) {
-    // waveType: 0=sine, 1=square, 2=noise
     int sampleRate = 44100;
     int samples    = (int)(sampleRate * dur);
     std::vector<short> data(samples);
@@ -362,6 +362,10 @@ static void InitAudio() {
     sSfxScore  = GenTone(150.0f, 0.35f, 0.7f, 2);
     sSfxMenu   = GenTone(660.0f, 0.05f, 0.4f, 0);
     sSfxWin    = GenTone(523.0f, 0.6f,  0.7f, 0);
+    
+    sBgMusic = LoadMusicStream("music.mp3");
+    gMusicLoaded = (sBgMusic.frameCount > 0);
+    gMusicLoaded = true;
 }
 
 static void PlaySfx(Sound &snd, float vol) {
@@ -372,7 +376,6 @@ static void PlaySfx(Sound &snd, float vol) {
 // ─────────────────────────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────────────────────────
-
 static void DrawCenteredText(const char *txt, int y, int fs, Color col) {
     int tw = MeasureText(txt, fs);
     DrawText(txt, BASE_W/2 - tw/2, y, fs, col);
@@ -559,7 +562,6 @@ static void InitPaddles() {
 static void StartNewGame() {
     gP1.score = 0; gP2.score = 0;
     gRally = 0;
-    // REMOVED: gCombo = 0;
     gGameOver = false; gWinner = 0;
     gModifier = (Modifier)GetRandomValue(0, MOD_COUNT - 1);
     InitPaddles();
@@ -684,7 +686,7 @@ static void DrawMainMenu(float t) {
     DrawText(title, BASE_W/2 - tw/2, 80, 96, titleCol);
 
     // Subtitle
-    DrawCenteredText("C++ Edition", 185, 22, COL_DIM);
+    DrawCenteredText("C++ EDITION", 185, 22, COL_DIM);
 
     // Menu items
     const char *items[] = {"SINGLE PLAYER", "TWO PLAYERS", "GAME MODE", "SETTINGS", "STATS", "ACHIEVEMENTS", "CONTROLS", "QUIT"};
@@ -695,7 +697,7 @@ static void DrawMainMenu(float t) {
     }
 
     // Version tag
-    DrawText("v1.0", BASE_W - 50, BASE_H - 22, 16, COL_DIM);
+    DrawText("v1.1", BASE_W - 50, BASE_H - 22, 16, COL_DIM);
 }
 
 static void DrawPauseMenu() {
@@ -958,6 +960,21 @@ int main() {
 
         if (gShakeTimer > 0) gShakeTimer -= dt;
 
+        // ADDED: Background music playback control
+        if (gMusicLoaded) {
+            UpdateMusicStream(sBgMusic);
+            SetMusicVolume(sBgMusic, gSave.musicVol * gSave.masterVol);
+            
+            // Play music in menu and game, pause when paused
+            if (gState == STATE_PAUSED) {
+                if (IsMusicStreamPlaying(sBgMusic)) PauseMusicStream(sBgMusic);
+            } else {
+                if (!IsMusicStreamPlaying(sBgMusic)) {
+                    PlayMusicStream(sBgMusic);
+                }
+            }
+        }
+
         switch (gState) {
 
         // ── MAIN MENU ──────────────────────────────────────
@@ -1216,7 +1233,6 @@ int main() {
         BeginTextureMode(canvas);
         ClearBackground(COL_BG);
 
-        // Neon theme: add a subtle gradient
         if (gSave.neonTheme) {
             DrawRectangleGradientV(0, 0, BASE_W, BASE_H/2, {10,0,30,120}, {0,0,0,0});
             DrawRectangleGradientV(0, BASE_H/2, BASE_W, BASE_H/2, {0,0,0,0}, {0,10,40,120});
@@ -1287,7 +1303,6 @@ int main() {
         EndDrawing();
     }
 
-    // Cleanup
     WriteSave(gSave);
     UnloadRenderTexture(canvas);
     UnloadSound(sSfxPaddle);
