@@ -925,6 +925,9 @@ static void HandleMenuInput() {
 int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
     InitWindow(BASE_W, BASE_H, "PONG");
+    Image icon = LoadImage("logo.png");
+    SetWindowIcon(icon);
+    UnloadImage(icon);
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
 
