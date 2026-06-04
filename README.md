@@ -2,7 +2,6 @@
 
 A polished, feature-rich arcade Pong clone built with **Raylib 5.x** and modern C++17. No external assets required — all audio is synthesized procedurally at runtime.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
 ![Raylib](https://img.shields.io/badge/Raylib-5.x-green.svg)
 ![Github release](https://img.shields.io/github/v/release/F0xyN0xy/Pong-Cpp)
